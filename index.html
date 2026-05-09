@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Unlocker</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; background-color: #eef2f3; padding: 20px; }
+        .container { max-width: 450px; margin: 40px auto; background: #fff; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        h2 { color: #2c3e50; font-size: 24px; }
+        .btn { display: block; width: 100%; padding: 18px; margin: 15px 0; font-size: 18px; font-weight: 600; border: none; border-radius: 12px; cursor: pointer; transition: 0.4s; }
+        .btn-unlock { background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); color: white; }
+        .btn-locked { background-color: #dfe6e9; color: #b2bec3; cursor: not-allowed; }
+        .btn-final { background-color: #2ecc71; color: white; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>ভিডিওটি দেখতে ধাপগুলো পূরণ করুন</h2>
+    <p>সবগুলো বাটন আনলক না করলে ভিডিও চলবে না</p>
+
+    <button id="btn1" class="btn btn-unlock" onclick="step1()">Step 1: Unlock Now</button>
+    <button id="btn2" class="btn btn-locked" id="btn2" onclick="step2()" disabled>Step 2: Unlock Final</button>
+    <button id="finalBtn" class="btn btn-final" onclick="goToVideo()">🔥 Watch Full Video</button>
+</div>
+
+<script>
+    // আপনার অ্যাড লিংক ও আসল ভিডিওর লিংক নিচে বসান
+    const myAdLink = "এখানে_আপনার_ADSTERRA_DIRECT_LINK_দিন";
+    const myVideoLink = "এখানে_আপনার_ভিডিওর_লিংক_দিন";
+
+    function step1() {
+        window.open(myAdLink, '_blank');
+        document.getElementById('btn1').innerText = "✅ Step 1 Done";
+        document.getElementById('btn1').disabled = true;
+        document.getElementById('btn1').style.opacity = "0.6";
+        
+        const b2 = document.getElementById('btn2');
+        b2.disabled = false;
+        b2.className = "btn btn-unlock";
+    }
+
+    function step2() {
+        window.open(myAdLink, '_blank');
+        document.getElementById('btn2').style.display = "none";
+        document.getElementById('finalBtn').style.display = "block";
+    }
+
+    function goToVideo() {
+        window.location.href = myVideoLink;
+    }
+</script>
+
+</body>
+</html>
