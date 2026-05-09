@@ -3,52 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Unlocker</title>
+    <title>Video Access Portal</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; background-color: #eef2f3; padding: 20px; }
-        .container { max-width: 450px; margin: 40px auto; background: #fff; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        h2 { color: #2c3e50; font-size: 24px; }
-        .btn { display: block; width: 100%; padding: 18px; margin: 15px 0; font-size: 18px; font-weight: 600; border: none; border-radius: 12px; cursor: pointer; transition: 0.4s; }
-        .btn-unlock { background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); color: white; }
-        .btn-locked { background-color: #dfe6e9; color: #b2bec3; cursor: not-allowed; }
-        .btn-final { background-color: #2ecc71; color: white; display: none; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; background-color: #1a1a1a; color: white; padding: 20px; }
+        .container { max-width: 400px; margin: 40px auto; background: #2d2d2d; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h2 { color: #00d2ff; }
+        .btn { display: block; width: 100%; padding: 16px; margin: 15px 0; font-size: 18px; font-weight: bold; border: none; border-radius: 10px; cursor: pointer; transition: 0.3s; }
+        .btn-unlock { background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%); color: white; }
+        .btn-locked { background-color: #444; color: #888; cursor: not-allowed; }
+        .btn-final { background: linear-gradient(135deg, #f2994a 0%, #f2c94c 100%); color: #000; display: none; }
+        
+        /* Full Screen Overlay */
+        #adOverlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); z-index: 9999; justify-content: center; align-items: center; flex-direction: column;
+        }
+        .timer-box { background: #333; padding: 40px; border-radius: 15px; border: 2px solid #00d2ff; }
+        #countdown { font-size: 50px; color: #00d2ff; display: block; margin-top: 10px; }
     </style>
 </head>
-<body>
+<body onbeforeunload="return checkStatus()">
 
 <div class="container">
-    <h2>ভিডিওটি দেখতে ধাপগুলো পূরণ করুন</h2>
-    <p>সবগুলো বাটন আনলক না করলে ভিডিও চলবে না</p>
+    <h2>ভিডিও আনলক করুন</h2>
+    <p>ধাপগুলো সম্পন্ন না করলে ভিডিও আসবে না</p>
 
-    <button id="btn1" class="btn btn-unlock" onclick="step1()">Step 1: Unlock Now</button>
-    <button id="btn2" class="btn btn-locked" id="btn2" onclick="step2()" disabled>Step 2: Unlock Final</button>
-    <button id="finalBtn" class="btn btn-final" onclick="goToVideo()">🔥 Watch Full Video</button>
+    <button id="btn1" class="btn btn-unlock" onclick="handleAd(1)">Step 1: Unlock Video</button>
+    <button id="btn2" class="btn btn-locked" onclick="handleAd(2)" disabled>Step 2: Final Verification</button>
+    <button id="finalBtn" class="btn btn-final" onclick="viewVideo()">🚀 Watch Full Video Now</button>
+</div>
+
+<div id="adOverlay">
+    <div class="timer-box">
+        <div style="font-size: 20px;">অ্যাড লোড হচ্ছে... <br>কেটে দিলে আনলক হবে না</div>
+        <span id="countdown">5</span>
+    </div>
 </div>
 
 <script>
-    // আপনার অ্যাড লিংক ও আসল ভিডিওর লিংক নিচে বসান
-    const myAdLink = "https://www.profitablecpmratenetwork.com/cqsumz3mi?key=af77bd2cbfd2305e41c035d29b85a359";
-    const myVideoLink = "https://myvidplay.com/d/xu77adpjmr7h";
+    // আপনার লিংকগুলো নিচে দিন
+    const adLink = "https://www.profitablecpmratenetwork.com/ycr84299d?key=1c76232d88129ecc2db73a83e4d84d04";
+    const videoLink = "https://myvidplay.com/d/xu77adpjmr7h";
 
-    function step1() {
-        window.open(myAdLink, '_blank');
-        document.getElementById('btn1').innerText = "✅ Step 1 Done";
-        document.getElementById('btn1').disabled = true;
-        document.getElementById('btn1').style.opacity = "0.6";
+    let currentStep = 0;
+    let isProcessing = false;
+
+    function handleAd(step) {
+        isProcessing = true;
+        window.open(adLink, '_blank');
         
-        const b2 = document.getElementById('btn2');
-        b2.disabled = false;
-        b2.className = "btn btn-unlock";
+        const overlay = document.getElementById('adOverlay');
+        const countdownDisplay = document.getElementById('countdown');
+        overlay.style.display = 'flex';
+        
+        let timeLeft = 5;
+        countdownDisplay.innerText = timeLeft;
+
+        const timer = setInterval(function() {
+            timeLeft--;
+            countdownDisplay.innerText = timeLeft;
+            
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                overlay.style.display = 'none';
+                isProcessing = false;
+                completeStep(step);
+            }
+        }, 1000);
     }
 
-    function step2() {
-        window.open(myAdLink, '_blank');
-        document.getElementById('btn2').style.display = "none";
-        document.getElementById('finalBtn').style.display = "block";
+    function completeStep(step) {
+        if (step === 1) {
+            const b1 = document.getElementById('btn1');
+            const b2 = document.getElementById('btn2');
+            b1.innerText = "✅ Step 1 Unlocked";
+            b1.className = "btn btn-locked";
+            b1.disabled = true;
+            b2.disabled = false;
+            b2.className = "btn btn-unlock";
+        } else if (step === 2) {
+            document.getElementById('btn2').style.display = "none";
+            document.getElementById('finalBtn').style.display = "block";
+        }
     }
 
-    function goToVideo() {
-        window.location.href = myVideoLink;
+    function viewVideo() {
+        window.location.href = videoLink;
+    }
+
+    // ট্রাফিক যদি পেজ কেটে দেওয়ার চেষ্টা করে
+    function checkStatus() {
+        if (isProcessing) {
+            return "অ্যাড চলাকালীন পেজ বন্ধ করলে আনলক হবে না!";
+        }
     }
 </script>
 
