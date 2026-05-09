@@ -3,99 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Access Portal</title>
+    <title>Video Verification</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; background-color: #1a1a1a; color: white; padding: 20px; }
-        .container { max-width: 400px; margin: 40px auto; background: #2d2d2d; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        h2 { color: #00d2ff; }
+        body { font-family: 'Segoe UI', sans-serif; text-align: center; background-color: #0f172a; color: #f8fafc; padding: 20px; }
+        .container { max-width: 400px; margin: 50px auto; background: #1e293b; padding: 30px; border-radius: 15px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3); }
         .btn { display: block; width: 100%; padding: 16px; margin: 15px 0; font-size: 18px; font-weight: bold; border: none; border-radius: 10px; cursor: pointer; transition: 0.3s; }
-        .btn-unlock { background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%); color: white; }
-        .btn-locked { background-color: #444; color: #888; cursor: not-allowed; }
-        .btn-final { background: linear-gradient(135deg, #f2994a 0%, #f2c94c 100%); color: #000; display: none; }
+        .btn-unlock { background: #3b82f6; color: white; }
+        .btn-locked { background: #334155; color: #94a3b8; cursor: not-allowed; }
+        .btn-final { background: #10b981; color: white; display: none; }
         
-        /* Full Screen Overlay */
         #adOverlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); z-index: 9999; justify-content: center; align-items: center; flex-direction: column;
+            background: rgba(0,0,0,0.95); z-index: 999; justify-content: center; align-items: center; flex-direction: column;
         }
-        .timer-box { background: #333; padding: 40px; border-radius: 15px; border: 2px solid #00d2ff; }
-        #countdown { font-size: 50px; color: #00d2ff; display: block; margin-top: 10px; }
+        .timer-msg { font-size: 20px; color: #ef4444; margin-bottom: 20px; padding: 0 20px; font-weight: bold; }
+        #countdown { font-size: 70px; color: #3b82f6; }
     </style>
 </head>
-<body onbeforeunload="return checkStatus()">
+<body>
 
 <div class="container">
-    <h2>ভিডিও আনলক করুন</h2>
-    <p>ধাপগুলো সম্পন্ন না করলে ভিডিও আসবে না</p>
+    <h2>Verify You Are Human</h2>
+    <p>অ্যাডটি ৫ সেকেন্ড না দেখলে বাটন রিসেট হয়ে যাবে</p>
 
-    <button id="btn1" class="btn btn-unlock" onclick="handleAd(1)">Step 1: Unlock Video</button>
-    <button id="btn2" class="btn btn-locked" onclick="handleAd(2)" disabled>Step 2: Final Verification</button>
-    <button id="finalBtn" class="btn btn-final" onclick="viewVideo()">🚀 Watch Full Video Now</button>
+    <button id="btn1" class="btn btn-unlock" onclick="startStrictTimer(1)">Unlock Step 1</button>
+    <button id="btn2" class="btn btn-locked" onclick="startStrictTimer(2)" disabled>Unlock Step 2</button>
+    <button id="finalBtn" class="btn btn-final" onclick="goToVideo()">🔥 Watch Video Now</button>
 </div>
 
 <div id="adOverlay">
-    <div class="timer-box">
-        <div style="font-size: 20px;">অ্যাড লোড হচ্ছে... <br>কেটে দিলে আনলক হবে না</div>
-        <span id="countdown">5</span>
-    </div>
+    <div id="statusText" class="timer-msg">অ্যাডের ট্যাবে ৫ সেকেন্ড অপেক্ষা করুন!</div>
+    <div id="countdown">5</div>
 </div>
 
 <script>
-    // আপনার লিংকগুলো নিচে দিন
     const adLink = "https://www.profitablecpmratenetwork.com/ycr84299d?key=1c76232d88129ecc2db73a83e4d84d04";
     const videoLink = "https://myvidplay.com/d/xu77adpjmr7h";
 
-    let currentStep = 0;
-    let isProcessing = false;
+    let timeLeft = 5;
+    let timerInterval;
+    let adWindow = null;
 
-    function handleAd(step) {
-        isProcessing = true;
-        window.open(adLink, '_blank');
+    function startStrictTimer(step) {
+        // নতুন ট্যাবে অ্যাড ওপেন করা এবং রেফারেন্স রাখা
+        adWindow = window.open(adLink, '_blank');
         
-        const overlay = document.getElementById('adOverlay');
-        const countdownDisplay = document.getElementById('countdown');
-        overlay.style.display = 'flex';
-        
-        let timeLeft = 5;
-        countdownDisplay.innerText = timeLeft;
+        if (!adWindow) {
+            alert("অনুগ্রহ করে পপ-আপ এলাউ করুন!");
+            return;
+        }
 
-        const timer = setInterval(function() {
-            timeLeft--;
-            countdownDisplay.innerText = timeLeft;
-            
+        document.getElementById('adOverlay').style.display = 'flex';
+        timeLeft = 5;
+        document.getElementById('countdown').innerText = timeLeft;
+        document.getElementById('statusText').innerText = "অ্যাডের ট্যাবে ৫ সেকেন্ড অপেক্ষা করুন...";
+
+        timerInterval = setInterval(function() {
+            // ১. চেক করা অ্যাড উইন্ডোটি কি এখনো খোলা আছে?
+            if (adWindow && !adWindow.closed) {
+                timeLeft--;
+                document.getElementById('countdown').innerText = timeLeft;
+            } else {
+                // ২. যদি ইউজার অ্যাড উইন্ডো কেটে দেয়, তবে রিসেট
+                clearInterval(timerInterval);
+                document.getElementById('adOverlay').style.display = 'none';
+                alert("❌ আপনি অ্যাড উইন্ডোটি কেটে দিয়েছেন! দয়া করে আবার ক্লিক করুন এবং ৫ সেকেন্ড অপেক্ষা করুন।");
+                return;
+            }
+
+            // ৩. টাইমার শেষ হলে আনলক করা
             if (timeLeft <= 0) {
-                clearInterval(timer);
-                overlay.style.display = 'none';
-                isProcessing = false;
-                completeStep(step);
+                clearInterval(timerInterval);
+                unlockStep(step);
             }
         }, 1000);
     }
 
-    function completeStep(step) {
+    function unlockStep(step) {
+        document.getElementById('adOverlay').style.display = 'none';
         if (step === 1) {
             const b1 = document.getElementById('btn1');
             const b2 = document.getElementById('btn2');
-            b1.innerText = "✅ Step 1 Unlocked";
+            b1.innerText = "✅ Step 1 Done";
             b1.className = "btn btn-locked";
             b1.disabled = true;
             b2.disabled = false;
             b2.className = "btn btn-unlock";
-        } else if (step === 2) {
+        } else {
             document.getElementById('btn2').style.display = "none";
             document.getElementById('finalBtn').style.display = "block";
         }
     }
 
-    function viewVideo() {
+    function goToVideo() {
         window.location.href = videoLink;
-    }
-
-    // ট্রাফিক যদি পেজ কেটে দেওয়ার চেষ্টা করে
-    function checkStatus() {
-        if (isProcessing) {
-            return "অ্যাড চলাকালীন পেজ বন্ধ করলে আনলক হবে না!";
-        }
     }
 </script>
 
